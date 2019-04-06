@@ -32,7 +32,7 @@ void setup() {
   server.on("/st", handle_st);
   server.on("/bt", handle_bt);
   server.on("/sp", handle_sp);
-  server.on("/bp", handle_bp);
+  
   server.onNotFound(handle_NotFound);
  //***********fin callback
   server.begin();
@@ -40,9 +40,11 @@ void setup() {
 }
 void loop() {
   server.handleClient();
+  
   if((dataRecived=getSerialData())!=""){//chequeo si llego la informacion por serial
-    if(dataRecived.length()>2)
+    if(dataRecived.length()>5)
     {
+      
       switch ((dataRecived.c_str())[0]){
       case 'a':
       tempSet="";
@@ -63,7 +65,38 @@ void loop() {
       poss+=String((dataRecived.c_str())[2]);
      
       break;
+      
     }
+
+
+
+
+    switch ((dataRecived.c_str())[6]){
+      case 'a':
+      tempSet="";
+      tempSet+=String((dataRecived.c_str())[7]);
+      tempSet+=String((dataRecived.c_str())[8]);
+     
+      
+      break;
+      case 'b':
+      tempNow="";
+      tempNow+=String((dataRecived.c_str())[7]);
+      tempNow+=String((dataRecived.c_str())[8]);
+     
+      break;
+      case 'c':
+      poss="";
+      poss+=String((dataRecived.c_str())[7]);
+      poss+=String((dataRecived.c_str())[8]);
+     
+      break;
+      
+    }
+
+
+
+    
     }
     
     
@@ -84,7 +117,7 @@ void handle_st() { // se llama a esta funcion cuando se presiona el boton subir 
  
 }
 void handle_bt() { // se llama a esta funcion cuando se presiona el boton bajar temperatura 
-  Serial.println("a"+String(tempSet.toInt()-TEMPERATURA));
+  Serial.println("b"+String(tempSet.toInt()-TEMPERATURA));
   server.send(200, "text/html", SendHTML()); 
 }
 void handle_sp() { // se llama a esta funcion cuando se presiona el boton subir persiana 
@@ -116,11 +149,11 @@ String SendHTML(void){
   ptr+="<body>\n";
   ptr+="<h3>Temperatura actual "+tempNow+"</h3>\n";
   ptr+="<h3>Temperatura seteada "+tempSet+"</h3>\n";
-  ptr+="<h3>Estado de apaertura de la persiana "+poss+"%</h3>\n";
+  //ptr+="<h3>Estado de apaertura de la persiana "+poss+"%</h3>\n";
   ptr +="<a class=\"button\" href=\"/st\">Subir Temp.</a>\n";
   ptr +="<a class=\"button\" href=\"/bt\">Bajar Temp.</a>\n";
-  ptr +="<a class=\"button\" href=\"/sp\">Subir Persiana</a>\n";
-  ptr +="<a class=\"button\" href=\"/bp\">Bajar Persiana</a>\n";
+  ptr +="<a class=\"button\" href=\"/sp\">Actualizar</a>\n";
+  
 
   ptr+="</body>\n";
   ptr+="</html>\n";
@@ -133,8 +166,10 @@ String getSerialData()
   String recibedData="";
   while(Serial.available())
   {
+    //Serial.println("recivi algo");
     String temp=Serial.readString();
     recibedData=recibedData+temp;
   }
+  //Serial.println(recibedData);
   return recibedData;
 }
